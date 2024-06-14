@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Sales.API.Data;
 using Sales.Shared.Entities;
@@ -28,8 +29,12 @@ namespace Sales.API.Controllers
             await _context.SaveChangesAsync();
             return Ok(country);
         }
-        
-       
+
+        [HttpGet]
+        public async Task<ActionResult> GetAsync()
+        {
+            return Ok(await _context.Countries.ToListAsync());
+        }
 
     }
 }
