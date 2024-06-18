@@ -16,6 +16,8 @@ namespace Sales.WEB.Repositories
         {
             _httpClient = httpClient;
         }
+
+        //Método GET
         public async Task<HttpResponseWrapper<T>> Get<T>(string url)
         {
             var responseHttp = await _httpClient.GetAsync(url);
@@ -28,7 +30,7 @@ namespace Sales.WEB.Repositories
             return new HttpResponseWrapper<T>(default, true, responseHttp);
         }
 
-
+        //Método POST
         public async Task<HttpResponseWrapper<object>> Post<T>(string url, T model)
         {
             var mesageJSON = JsonSerializer.Serialize(model);
@@ -38,6 +40,8 @@ namespace Sales.WEB.Repositories
             return new HttpResponseWrapper<object>(null,
             !responseHttp.IsSuccessStatusCode, responseHttp);
         }
+
+        //Método POST que devuelve respuesta
         public async Task<HttpResponseWrapper<TResponse>> Post<T, TResponse>(string
         url, T model)
         {
@@ -55,6 +59,41 @@ namespace Sales.WEB.Repositories
             return new HttpResponseWrapper<TResponse>(default,
             !responseHttp.IsSuccessStatusCode, responseHttp);
         }
+
+
+       //Método DELETE
+        public async Task<HttpResponseWrapper<object>> Delete(string url)
+        {
+            var responseHTTP = await _httpClient.DeleteAsync(url);
+            return new HttpResponseWrapper<object>(null, !responseHTTP.IsSuccessStatusCode, responseHTTP);
+        }
+
+
+        //Método PUT
+        public async Task<HttpResponseWrapper<object>> Put<T>(string url, T model)
+        {
+            var messageJSON = JsonSerializer.Serialize(model);
+            var messageContent = new StringContent(messageJSON, Encoding.UTF8, "application/json");
+            var responseHttp = await _httpClient.PutAsync(url, messageContent);
+            return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
+        }
+
+        //Método PUT que devuelve respuesta
+        public async Task<HttpResponseWrapper<TResponse>> Put<T, TResponse>(string url, T model)
+        {
+            var messageJSON = JsonSerializer.Serialize(model);
+            var messageContent = new StringContent(messageJSON, Encoding.UTF8, "application/json");
+            var responseHttp = await _httpClient.PutAsync(url, messageContent);
+            if (responseHttp.IsSuccessStatusCode)
+            {
+                var response = await UnserializeAnswer<TResponse>(responseHttp, _jsonDefaultOptions);
+                return new HttpResponseWrapper<TResponse>(response, false, responseHttp);
+            }
+            return new HttpResponseWrapper<TResponse>(default, !responseHttp.IsSuccessStatusCode,
+            responseHttp);
+        }
+
+        //Método que Deserializa todas las respuestas
         private async Task<T> UnserializeAnswer<T>(HttpResponseMessage httpResponse,
         JsonSerializerOptions jsonSerializerOptions)
         {
@@ -62,6 +101,5 @@ namespace Sales.WEB.Repositories
             return JsonSerializer.Deserialize<T>(respuestaString,
             jsonSerializerOptions)!;
         }
-
     }
 }

@@ -1,10 +1,14 @@
 ﻿@page "/countries"
 @using Sales.Shared.Entities
 @using Sales.WEB.Repositories
-@inject IRepository Repository
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
 
 
 <h3>Paises</h3>
+
+<a class="btn btn-primary" href="/countries/create">Nuevo País</a>
 
 <GenericList MyList="Countries">
     <Body>
@@ -20,8 +24,8 @@
                 {
                     <tr>
                         <td>
-                            <a class="btn btn-warning">Editar</a>
-                            <button class="btn btn-danger">Borrar</button>
+                            <a class="btn btn-warning" href="/countries/edit/@country.Id">Editar </a>
+                            <button class="btn btn-danger" @onclick=@(()=> DeleteAsync(country.Id))>Borrar</button>
                         </td>
                         <td>
 
@@ -39,13 +43,55 @@
 
 
 @code {
+
     public List<Country>? Countries { get; set; }
 
+
+    //Método para recargar la página
     protected async override Task OnInitializedAsync()
     {
-        var responseHppt = await Repository.Get<List<Country>>("api/countries");
-        Countries = responseHppt.Response!;
+        await LoadAsync();
     }
 
+    private async Task LoadAsync()
+    {
+        var responseHppt = await repository.Get<List<Country>>("api/countries");
+        Countries = responseHppt.Response!;
+
+    }
+
+    //Método Borrar
+
+    private async Task DeleteAsync(int id)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Realmente deseas eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                CancelButtonText = "No",
+                ConfirmButtonText = "Si"
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.Delete($"/api/countries/{id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode != System.Net.HttpStatusCode.NotFound)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+        }
+
+        await LoadAsync();
+    }
 }
 

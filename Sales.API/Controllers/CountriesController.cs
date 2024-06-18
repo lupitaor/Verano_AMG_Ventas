@@ -37,8 +37,8 @@ namespace Sales.API.Controllers
         }
 
         //Método Get por Id
-        [HttpGet("id:int") ]
-        public async Task<ActionResult> GetAsync(int id)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetAsync(int id)
         {
             var country =await _context.Countries.FirstOrDefaultAsync(x => x.Id == id );
 
@@ -60,22 +60,19 @@ namespace Sales.API.Controllers
             return Ok(country);
         }
 
-        //Método Delete
-        [HttpDelete]
-        public async Task<ActionResult> DeleteAsync(int id)
+        //Método Delete por Id
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             var country = await _context.Countries.FirstOrDefaultAsync(x => x.Id == id);
-
             if (country == null)
             {
                 return NotFound();
             }
 
-            _context.Countries.Remove(country);
+            _context.Remove(country);
             await _context.SaveChangesAsync();
-
-
-           return NoContent();
+            return NoContent();
         }
 
 
