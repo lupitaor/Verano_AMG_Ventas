@@ -16,9 +16,14 @@ namespace Sales.Shared.Entities
         [Display (Name="Pais")]
         [MaxLength(100, ErrorMessage ="El campo {0} debe teren un máximo de {1} caracteres")]
         [Required(ErrorMessage ="El campo {0} es requerido") ]
-        public string Name { get; set; } = null;
+        public string Name { get; set; } = null!;
 
+        public ICollection<State>? States { get; set; } ////Esta propiedad permite la relación de uno a muchos con State
 
-
+        //si el objeto States es exactamente igual a null entonces diremos que tiene cero estados, 
+        //de lo contrario con States.Count tendremos la cantidad de estados
+        public int StatesNumber => States == null ? 0 : States.Count;
+    
+    
     }
 }
